@@ -79,3 +79,7 @@ qr_flutter/
 - 二维码编码用 [`qr`](https://pub.dev/packages/qr)：`QrImage(QrCode.fromData(data: ..., errorCorrectLevel: ...))`，UTF-8 原生支持，`QrErrorCorrectLevel` 是 int 常量容器
 - 模块渲染为自绘 `CustomPainter`；深色模式下自动反色保证对比度
 - 保存走 `file_selector` 原生对话框；无任何网络权限与遥测
+
+## License
+
+[MIT](LICENSE)
