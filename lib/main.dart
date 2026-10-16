@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:file_selector/file_selector.dart';
@@ -80,7 +79,8 @@ class _HomePageState extends State<HomePage> {
 
   QrImage? _qr;
   String? _error;
-  QrErrorCorrectLevel _ecl = QrErrorCorrectLevel.M;
+  // qr 3.x 的 QrErrorCorrectLevel 是 int 常量容器（不是类型）
+  int _ecl = QrErrorCorrectLevel.M;
   bool _dots = true;
   double _size = 320;
 
@@ -118,7 +118,9 @@ class _HomePageState extends State<HomePage> {
         return;
       }
       try {
-        _qr = QrImage.fromData(data: text, errorCorrectLevel: _ecl);
+        _qr = QrImage(
+          QrCode.fromData(data: text, errorCorrectLevel: _ecl),
+        );
       } catch (_) {
         _qr = null;
         _error = '内容过长：超出当前纠错等级的容量上限\n请缩短内容或降低纠错等级';
@@ -363,14 +365,9 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 14),
           _label(context, '纠错等级 ERROR CORRECTION'),
           const SizedBox(height: 8),
-          SegmentedButton<QrErrorCorrectLevel>(
+          SegmentedButton<int>(
             segments: [
-              for (final e in const [
-                QrErrorCorrectLevel.L,
-                QrErrorCorrectLevel.M,
-                QrErrorCorrectLevel.Q,
-                QrErrorCorrectLevel.H,
-              ])
+              for (final e in QrErrorCorrectLevel.levels)
                 ButtonSegment(value: e, label: Text(_eclText[e]!)),
             ],
             selected: {_ecl},
