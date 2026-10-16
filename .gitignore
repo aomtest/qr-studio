@@ -15,5 +15,6 @@ build/
 Thumbs.db
 .DS_Store
 
-# 本地生成的平台脚手架（CI 会自动生成 windows/）
+# 本地生成的平台脚手架（CI 会自动生成）
 _scaffold/
+windows/
