@@ -1,0 +1,70 @@
+name: Build Windows Release
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate Windows platform scaffolding
+        shell: pwsh
+        run: |
+          flutter create --platforms=windows --project-name qr_studio --org dev.qrstudio _scaffold
+          New-Item -ItemType Directory -Force -Path windows | Out-Null
+          Copy-Item -Recurse -Force _scaffold/windows/* ./windows/
+          Remove-Item -Recurse -Force _scaffold
+
+          # 应用图标
+          if (Test-Path assets/app_icon.ico) {
+            Copy-Item -Force assets/app_icon.ico windows/runner/resources/app_icon.ico
+          }
+
+          # 窗口标题与初始尺寸
+          $mainCpp = "windows/runner/main.cpp"
+          if (Test-Path $mainCpp) {
+            $c = Get-Content $mainCpp -Raw
+            $c = $c -replace 'L"qr_studio"', 'L"QR Studio"'
+            $c = $c -replace 'Win32Window::Size size\(1280,\s*720\)', 'Win32Window::Size size(1120, 820)'
+            Set-Content -Path $mainCpp -Value $c -NoNewline
+          }
+
+      - name: Flutter version
+        run: flutter --version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+        continue-on-error: true
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Rename executable
+        shell: pwsh
+        run: |
+          $dir = "build/windows/x64/runner/Release"
+          if (Test-Path "$dir/qr_studio.exe") { Move-Item -Force "$dir/qr_studio.exe" "$dir/QRStudio.exe" }
+          Copy-Item -Force assets/app_icon.ico "$dir/app.ico" -ErrorAction SilentlyContinue
+          Get-ChildItem $dir | Select-Object Name, Length
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: QRStudio-Windows
+          path: build/windows/x64/runner/Release/
+          if-no-files-found: error
+          retention-days: 30

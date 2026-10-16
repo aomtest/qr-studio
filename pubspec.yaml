@@ -1,0 +1,21 @@
+name: qr_studio
+description: "QR Studio — 本地二维码生成器（Material 3 Expressive / Flutter）"
+publish_to: 'none'
+version: 2.0.0+1
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  qr: ^3.0.2
+  file_selector: ^1.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
